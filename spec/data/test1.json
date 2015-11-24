@@ -1,0 +1,26 @@
+{
+  "columns": {
+    "column1": {
+      "name": "column1",
+      "type": "string",
+      "key": true
+    },
+    "column2": {
+      "name": "column2",
+      "type": "string",
+      "key": false
+    },
+    "column3": {
+      "name": "column3",
+      "type": "string",
+      "key": false
+    },
+    "column3": {
+      "name": "column3",
+      "type": "string",
+      "key": false
+    }
+  }
+}
+
+
