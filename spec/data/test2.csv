@@ -1,0 +1,5 @@
+column1,column2,column3,column4
+row1value1,12,true,2012-01-01
+row2value1,22,true,2012-01-02
+row3value1,32,false,2012-01-03
+row4value1,42,false,2012-01-04

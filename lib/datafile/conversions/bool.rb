@@ -1,15 +1,19 @@
-class String
-  def to_bool
-    b = false
-    if self =~ /^true$/i
-      b = true
-    elsif self =~ /^false$/i
-      b = false
-    elsif self =~ /^1$/
-      b = true
-    elsif self =~ /^0$/
-      false
+module Datafile
+  module Conversions
+    class Converter
+      def to_bool
+        b = false
+        if string =~ /^true$/i
+          b = true
+        elsif string =~ /^false$/i
+          b = false
+        elsif string =~ /^1$/
+          b = true
+        elsif string =~ /^0$/
+          false
+        end
+        return b
+      end
     end
-    return b
   end
 end

@@ -2,7 +2,7 @@ require "csv"
 
 module Datafile
   class DB
-    def self.load sourcefile, options={}
+    def self.load sourcefile, options={}, &block
       (metadatafile, dbfile) = self.files(sourcefile)
 
       raise "#{metadatafile} metadata file does not exists!" unless ::File.exists?(metadatafile)
@@ -30,7 +30,15 @@ module Datafile
           line += 1
           currentRow = row
           begin
-            record = Record.from_row(row, metadata)
+            # perform type conversions
+            row.each do |field, value|
+              unless metadata.columns[field].nil?
+                type = metadata.columns[field].type
+                row[field] = Conversions.convert(value).to(type) if type != "string"
+              end
+            end
+            record = Record.from_row(row)
+            block.call(record) unless block.nil?
           rescue => e
             new_e = e.class.new("Line #{line}: #{e}")
             new_e.set_backtrace(e.backtrace)

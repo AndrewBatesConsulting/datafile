@@ -1,5 +1,7 @@
 module Datafile
   class Columns
+    extend Forwardable
+    def_delegators :@definitions, :[]
     attr_reader :names
     def initialize
       @definitions = {}

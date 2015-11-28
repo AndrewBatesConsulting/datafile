@@ -10,7 +10,7 @@ describe Datafile::Conversions do
       ["FALSE", false],
       ["TRUE", true],
     ].each do |test|
-      expect(test[0].to_bool).to eq(test[1])
+      expect(Datafile::Conversions.convert(test[0]).to_bool).to eq(test[1])
     end
   end
 
@@ -24,7 +24,17 @@ describe Datafile::Conversions do
       ["01/01/99 01:01:01", Time.new(1999, 1, 1, 1, 1, 1)],
       ["2000-01-01 01:01:01", Time.new(2000, 1, 1, 1, 1, 1)],
     ].each do |test|
-      expect(test[0].to_date).to eq(test[1])
+      expect(Datafile::Conversions.convert(test[0]).to_date).to eq(test[1])
     end
+  end
+
+  it 'can convert strings into integers' do
+    expect(Datafile::Conversions.convert("1234").to_int).to eq(1234)
+  end
+
+  it 'can convert to a specified type' do
+    expect(Datafile::Conversions.convert("true").to("bool")).to eq(true)
+    expect(Datafile::Conversions.convert("01/01/2000").to("date")).to eq(Time.new(2000, 1, 1, 0, 0, 0))
+    expect(Datafile::Conversions.convert("1234").to("int")).to eq(1234)
   end
 end

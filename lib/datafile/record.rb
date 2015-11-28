@@ -3,7 +3,7 @@ module Datafile
     extend Forwardable
     def_delegators :@row, :[], :[]=, :each, :to_s, :inspect
 
-    def self.from_row row, metadata
+    def self.from_row row
       record = self.new
       row.each do |field, value|
         record[field] = value
