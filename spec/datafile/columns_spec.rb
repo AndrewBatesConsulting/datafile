@@ -5,16 +5,14 @@ describe Datafile::Columns do
     "c1" => {
       name:"c1",
       type:"string",
-      key:false
     },
     "c2" => {
       name:"c2",
       type:"string",
-      key:false
     }
   }
 
-  test_json = '{"c1":{"name":"c1","type":"string","key":false},"c2":{"name":"c2","type":"string","key":false}}'
+  test_json = '{"c1":{"name":"c1","type":"string"},"c2":{"name":"c2","type":"string"}}'
 
   it 'ensures column name matches column definition' do
     expect {

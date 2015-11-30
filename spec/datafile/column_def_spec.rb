@@ -4,16 +4,9 @@ describe Datafile::ColumnDef do
   test_hash = {
     name: "c1",
     type: "string",
-    key: true
   }
 
-  test_json = '{"name":"c1","type":"string","key":true}'
-
-  it 'only accepts booleans for key' do
-    expect {
-      Datafile::ColumnDef.new(name: "c1", type: "string", key: "true")
-    }.to raise_error("Key must be either true or false")
-  end
+  test_json = '{"name":"c1","type":"string"}'
 
   it 'can generate a hash' do
     cd = Datafile::ColumnDef.new(test_hash)

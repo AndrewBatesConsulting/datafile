@@ -1,14 +1,10 @@
 module Datafile
   class ColumnDef
-    attr_reader :name, :type, :key
+    attr_reader :name, :type
 
     def initialize definition={}
-      @key = definition[:key] || false
       @name = definition[:name] || raise("Column name must be specified")
       @type = definition[:type] || raise("Column type must be specified")
-      unless @key.is_a?(TrueClass) or @key.is_a?(FalseClass)
-        raise "Key must be either true or false"
-      end
     end
 
     def self.from_hash hash
@@ -23,7 +19,6 @@ module Datafile
       {
         name: @name,
         type: @type,
-        key: @key,
       }
     end
 

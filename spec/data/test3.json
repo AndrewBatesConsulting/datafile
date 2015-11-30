@@ -1,7 +1,7 @@
 {
   "columns": {
-    "column1": {
-      "name": "column1",
+    "key": {
+      "name": "key",
       "type": "string"
     },
     "column2": {
@@ -12,8 +12,12 @@
       "name": "column3",
       "type": "bool"
     },
-    "column4": {
-      "name": "column4",
+    "row_start": {
+      "name": "row_start",
+      "type": "date"
+    },
+    "row_end": {
+      "name": "row_end",
       "type": "date"
     }
   }

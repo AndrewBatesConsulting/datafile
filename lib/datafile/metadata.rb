@@ -8,6 +8,7 @@ module Datafile
 
     def self.from_hash hash
       metadata = self.new
+      
       # convert keys to symbols
       hash = hash.inject({}){ |hash, (k, v)| hash.merge( k.to_sym => v )  }
       metadata.instance_variable_set(:@columns, Columns.from_hash(hash[:columns]))
@@ -35,7 +36,7 @@ module Datafile
 
     def to_hash
       {
-        columns: @columns.to_hash
+        columns: @columns.to_hash,
       }
     end
 

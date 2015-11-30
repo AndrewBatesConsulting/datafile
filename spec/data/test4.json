@@ -1,0 +1,22 @@
+{
+  "columns": {
+    "key1": {
+      "name": "key1",
+      "type": "string"
+    },
+    "key2": {
+      "name": "key2",
+      "type": "string"
+    },
+    "row_start": {
+      "name": "row_start",
+      "type": "date"
+    },
+    "row_end": {
+      "name": "row_end",
+      "type": "date"
+    }
+  }
+}
+
+
