@@ -1,6 +1,10 @@
 module Datafile
   module Conversions
     class Converter
+      def to_boolean
+        to_bool
+      end
+
       def to_bool
         b = false
         if string =~ /^true$/i

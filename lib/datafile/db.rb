@@ -7,36 +7,24 @@ module Datafile
     end
 
     def self.load sourcefile, options={}, &block
-      (metadatafile, dbfile) = self.files(sourcefile)
+      #options[:record_class] ||= Datafile::Record
 
-      raise "#{metadatafile} metadata file does not exists!" unless ::File.exists?(metadatafile)
-      metadata = Metadata.from_json(::File.read(metadatafile))
+      dbfile = self.files(sourcefile)
 
       raise "#{dbfile} database already exists!" if ::File.exists?(dbfile)
       @dbh = SQLite3::Database.new("#{dbfile}")
       
       @dbh.results_as_hash = true
-      @db = self.new(@dbh, metadata, options)
-
-      insert_sql = metadata.insert_string
+      @db = self.new(@dbh, options)
 
       begin
-        # Create the table
-        begin
-          @dbh.execute(metadata.create_string)
-        rescue => e
-          STDERR.puts "Failed to create table: #{e}"
-          STDERR.puts "SQL: #{metadata.create_string}"
-          raise e
-        end
-
         currentRow = nil
         line = 1
         CSV.foreach(sourcefile, :headers => :first_row, :encoding => 'ISO-8859-1') do |row|
           line += 1
           currentRow = row
           begin
-            record = Record.from_row(@db.convert_row(row))
+            record = options[:record_class].from_row(row)
             block.call(record) unless block.nil?
           rescue => e
             new_e = e.class.new("Line #{line}: #{e}")
@@ -44,7 +32,7 @@ module Datafile
             raise new_e
           end
 
-          @db << [insert_sql, record.values(metadata.columns.names)]
+          @db << record
         end
 
         @db.flush
@@ -57,16 +45,13 @@ module Datafile
     end
 
     def self.open sourcefile, options={}
-      (metadatafile, dbfile) = self.files(sourcefile)
-
-      raise "#{metadatafile} metadata file does not exist!" unless ::File.exists?(metadatafile)
-      metadata = Metadata.from_json(::File.read(metadatafile))
+      dbfile = self.files(sourcefile)
 
       raise "#{dbfile} database doest not exist!" unless ::File.exists?(dbfile)
 
       @dbh = SQLite3::Database.new("#{dbfile}")
       @dbh.results_as_hash = true
-      @db = DB.new(@dbh, metadata, options)
+      @db = DB.new(@dbh, options)
       @db
     end
 
@@ -85,40 +70,41 @@ module Datafile
       return @dbh.execute("pragma table_info(data)").map { |row| row['name'] }
     end
 
+    def data_table_created?
+      return @dbh.table_info("data").length > 0
+    end
+
     def flush
+      return if @statements.length == 0
+
+      unless data_table_created?
+        # Create the table
+        begin
+          @dbh.execute(@options[:record_class].create_string)
+        rescue => e
+          raise e
+        end
+      end
+
       @dbh.transaction do |db|
-        @statements.each do |statement, values|
-          @dbh.execute(statement, values)
+        @statements.each do |record|
+          record.insert(@dbh)
         end
       end
       @statements = []
     end
 
-    def convert_row row
-      new_row = row.dup
-      row.each do |field, value|
-        value = nil if value =~ /^\s*$/
-        new_row[field] = value
-        unless value.nil? or @metadata.columns[field].nil?
-          type = @metadata.columns[field].type
-          new_row[field] = Conversions.convert(value).to(type) if type != "string"
-        end
-      end
-      new_row
-    end
-
     private
       def self.files sourcefile
         dir = ::File.dirname(sourcefile)
-        metadatafile = "#{dir}/#{::File.basename(sourcefile, '.*')}.json"
+        #metadatafile = "#{dir}/#{::File.basename(sourcefile, '.*')}.json"
         dbfile = "#{dir}/#{::File.basename(sourcefile, '.*')}.db"
 
-        return metadatafile, dbfile
+        return dbfile
       end
 
-      def initialize dbh, metadata, options={}
+      def initialize dbh, options={}
         @dbh = dbh
-        @metadata = metadata
         @options = options
         @options[:flush_interval] ||= 100
         @statements = []
