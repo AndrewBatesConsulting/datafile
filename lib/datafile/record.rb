@@ -4,7 +4,7 @@ module Datafile
     def_delegators :@row, :[], :[]=, :each, :to_s, :inspect
 
     def self.all latest=true, &block
-      having = latest ? "MAX(#{self.row_start})" : "MIN(#{self.row_start})"
+      having = latest ? "MAX(#{self.row_start}) AND MAX(#{self.row_end})" : "MIN(#{self.row_start}) AND MIN(#{self.row_end})"
       query = nil
       if self.where.nil?
         query = "SELECT * FROM data GROUP BY CONTRACT_NUMBER HAVING #{having}"
@@ -18,15 +18,23 @@ module Datafile
     end
 
     def self.column columndef
+      @columns ||= Columns.new
       if columndef.is_a? Hash
         columndef = ColumnDef.from_hash(columndef)
       end
-      self.columns << columndef
+      define_method(columndef.name.downcase) do
+        instance_variable_get(:@row)[columndef.name]
+      end
+      @columns << columndef
     end
 
     def self.columns
-      @columns ||= Columns.new
-      @columns
+      columns = @columns || Columns.new
+      if self.superclass.respond_to?(:columns)
+        supercolumns = self.superclass.columns
+        columns = columns + supercolumns unless supercolumns.nil?
+      end
+      return columns
     end
 
     def self.create_string
@@ -40,7 +48,7 @@ module Datafile
       key_clause = keys.map{ |key,value| "#{key}=?"}.join(" AND ")
       key_clause = "#{where} AND #{key_clause}" unless where.nil?
 
-      row = Datafile::DB.instance.execute("SELECT * FROM data WHERE #{key_clause} ORDER BY #{row_start} asc LIMIT 1", keys.values)[0]
+      row = Datafile::DB.instance.execute("SELECT * FROM data WHERE #{key_clause} ORDER BY #{row_start}, #{row_end} ASC LIMIT 1", keys.values)[0]
       from_row(row)
     end
 
@@ -73,13 +81,22 @@ module Datafile
 
     def self.row_end row_end_field=nil
       if row_end_field.nil? 
+        if @row_end.nil? && self.superclass.respond_to?(:row_end)
+          return self.superclass.row_end
+        end
+
         return @row_end || raise("a row_end field must be supplied")
       end
+
       @row_end = row_end_field
     end
 
     def self.row_start row_start_field=nil
       if row_start_field.nil? 
+        if @row_start.nil? && self.superclass.respond_to?(:row_start)
+          return self.superclass.row_start
+        end
+
         return @row_start || raise("a row_start field must be supplied")
       end
       @row_start = row_start_field

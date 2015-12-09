@@ -2,10 +2,10 @@ module Datafile
   class Columns
     extend Forwardable
     def_delegators :@definitions, :[]
-    attr_reader :names
-    def initialize
-      @definitions = {}
-      @names = []
+    attr_reader :names, :definitions
+    def initialize definitions={}, names = []
+      @definitions = definitions
+      @names = names
     end
 
     def self.from_hash hash
@@ -44,6 +44,13 @@ module Datafile
 
     def to_json(*a)
       to_hash.to_json(*a)
+    end
+
+    def + other
+      raise "Can't add #{other.class}" unless other.is_a?(Columns)
+      names = @names + other.names
+      defs = @definitions.merge(other.definitions)
+      Columns.new(defs, names)
     end
   end
 end

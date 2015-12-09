@@ -2,7 +2,7 @@ module Datafile
   module Conversions
     class Converter
       def to_int
-        string.to_i
+        object.to_i
       end
     end
   end

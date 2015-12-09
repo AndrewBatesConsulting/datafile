@@ -4,14 +4,14 @@ require "datafile/conversions/int"
 
 module Datafile
   module Conversions
-    def self.convert string
-      return Converter.new(string)
+    def self.convert object
+      return Converter.new(object)
     end
 
     class Converter
-      attr_reader :string
-      def initialize string
-        @string = string
+      attr_reader :object
+      def initialize object
+        @object = object
       end
 
       def to type
