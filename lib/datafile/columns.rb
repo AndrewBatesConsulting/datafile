@@ -32,6 +32,12 @@ module Datafile
       @definitions[name] = columndef
     end
 
+    def each &block
+      @names.each do |name|
+        block.call(@definitions[name]) unless block.nil?
+      end
+    end
+
     def map &block
       @names.map {|name| block.call(@definitions[name]) }
     end

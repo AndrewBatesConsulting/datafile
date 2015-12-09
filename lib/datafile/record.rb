@@ -110,8 +110,8 @@ module Datafile
     end
 
     def == other
-      @row.each do |field, value|
-        return false if value != other[field]
+      self.class.columns.each do |column|
+        return false if @row[column.name] != other[column.name]
       end
       true
     end
